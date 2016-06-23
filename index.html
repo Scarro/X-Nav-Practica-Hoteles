@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8'>
+    <title>Alojamientos en Madrid</title>
+    <meta http-equiv="X-UA-Compatible" content="IE-edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="external/bootstrap/css/bootstrap.css" type="text/css">
+    <link rel="stylesheet" href="external/leaflet/leaflet.css" type="text/css">
+    <link rel="stylesheet" href="external/leaflet/font-awesome-4.6.3/css/font-awesome.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="navbar navbar-inverse">
+            <div class="navbar-header">
+                <button class="navbar-toggle" type="button" data-toggle="collapse" data-target="#myNavbar">
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a id="main-nav" class="navbar-brand">Alojamientos</a>
+            </div>
+            <div class="collapse navbar-collapse" id="myNavbar">
+                <ul class="nav navbar-nav">
+                    <li id="colecciones-nav" style="display:none;"><a>Colecciones</a></li>
+                    <li id="gestion-nav" style="display:none;"><a>Gestión de alojamientos</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div id="main" class="container-fluid">
+        <div class="col-sm-3">
+            <button id="get" type="button" class="btn btn-default">
+                <span class="glyphicon glyphicon-collapse-down"></span>
+                <span>Alojamientos</span>
+            </button>
+            <div id="lista-alojamientos" style="display:none;">
+                <input type="search" class="form-control" id="searchinput" placeholder="Buscar...">
+                <ul id="lista" class="nav nav-pills nav-stacked"></ul>
+                <h4 id="num_hoteles"></h4>
+            </div>
+        </div>
+        <div class="col-sm-9">
+            <div class="row alojamientos">
+                <div id="map"></div>
+            </div>
+            <div class="row colecciones" style="display:none">
+                <div id="form-colecciones" class="col-sm-8">
+                    <form id="form-coleccion" class="col-xs-10 form-horizontal" data-toggle="validator" role="form">
+                        <div class="form-group">
+                            <label for="collection" class="control-label">Introduce una nueva coleccion: </label>
+                            <input id="nueva_coleccion" type="text" class="form-control" id="collection" placeholder="Escriba aqui..." required>
+                        </div>
+                        <div class="form-group">
+                            <button id="btn_coleccion" type="submit" class="btn btn-primary pull-right">Entrar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="row colecciones" style="display:none">
+                <div class="col-xs-6">
+                    <h2>Colecciones: </h2>
+                    <div id="collection-list" class="list-group"></div>
+                </div>
+                <div class="col-xs-6">
+                    <h2>Seleccionada:</h2>
+                    <div id="selected" class="list-group"></div>
+                </div>
+            </div>
+            <div class="row alojamientos">
+                <div id="detalles"></div>
+            </div>
+        </div>
+    </div>
+    <script type="text/javascript" src="external/jquery/jquery.js"></script>
+    <script type="text/javascript" src="external/jquery/jquery-ui.js"></script>
+    <script type="text/javascript" src="external/bootstrap/js/bootstrap.js"></script>
+    <script type="text/javascript" src="external/leaflet/leaflet.js"></script>
+    <script src="https://cdn.rawgit.com/CliffCloud/Leaflet.EasyButton/master/src/easy-button.js"></script>
+    <script type="text/javascript" src="js/functions.js"></script>
+    <script type="text/javascript" src="external/bootstrap/js/bootstrap-list-filter.src.js"></script>
+
+</body>
+</html>

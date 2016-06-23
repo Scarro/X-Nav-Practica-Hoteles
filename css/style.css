@@ -1,0 +1,46 @@
+@media(max-width: 768px){
+    #lista {
+        height:281px;
+    }
+}
+
+@media(min-width:768px){
+    #lista{
+        height:900px;
+    }
+}
+
+#map {
+    height:450px;
+}
+
+#lista {
+    overflow-y: scroll;
+}
+
+#crear_coleccion {
+    top-margin: 20px;
+}
+
+#main-nav:hover, .navbar-inverse .navbar-nav > li > a:hover, .navbar-inverse .navbar-nav > li > a:focus {
+    color: #fff;
+    background-color: transparent;
+    cursor: pointer;
+}
+
+a.list-group-item:hover {
+    cursor:pointer;
+}
+
+.row {
+    top: 30px;
+}
+
+.imagen {
+    float:right;
+    margin-top:60px;
+}
+
+#num_hoteles {
+    padding-top: 10px;
+}
