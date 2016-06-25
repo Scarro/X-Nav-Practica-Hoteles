@@ -349,7 +349,7 @@ function exportar(){
     var nombre = $('#nombre_arch1').val();
 
     //console.log("token: " + token + " repositorio: " + repositorio + " nombre: " + nombre);
-    var github = new Github({token:token, auth:"oaut"});
+    //var github = new Github({token:token, auth:"oaut"});
 }
 
 function importar(){
@@ -358,5 +358,5 @@ function importar(){
     var nombre = $('#nombre_arch2').val();
 
     //console.log("token: " + token + " repositorio: " + repositorio + " nombre: " + nombre);
-    var github = new Github({token:token, auth:"oaut"});
+    //var github = new Github({token:token, auth:"oaut"});
 }
