@@ -50,6 +50,11 @@
     cursor: pointer;
 }
 
+.lista-hoteles{
+    overflow-y: auto;
+    height:80px;
+}
+
 a.list-group-item:hover {
     cursor:pointer;
 }
@@ -61,6 +66,11 @@ a.list-group-item:hover {
 
 #lista {
     overflow-y: scroll;
+}
+
+#collection-list {
+    overflow-y: auto;
+    height:740px;
 }
 
 .imagen {

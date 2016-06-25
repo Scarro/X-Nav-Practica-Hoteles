@@ -13,32 +13,14 @@ $(document).ready(function(){
         dameAlojamientos();
     });
     mostrarColecciones();
+    $('#seleccionado').html(htmlColeccion(false));
+    $('#selected').html(htmlColeccion(false));
     $('#form-coleccion').submit(function(event){
         event.preventDefault();
         insertar_coleccion($('#nueva_coleccion').val());
         mostrarColecciones();
-        $('.coleccion').droppable({
-            hoverClass:'border',
-            drop: handleDrop,
-        });
-        $('.coleccion').click(function(event){
-            event.preventDefault();
-            var s = event.currentTarget.attributes[0].value;
-            if(s>=0){
-                colecciones[s].sel = true;
-                for(var i=0; i<colecciones.length; i++){
-                    if(i != s && colecciones[i].sel == true){
-                        colecciones[i].sel = false;
-                    }
-                }
-            }
-            seleccionado = colecciones[s];
-            var html = htmlColeccion(s);
-            $('#selected').html(html);
-            $('#seleccionado').html(html);
-        });
+        collectionHandlers();
     });
-
     $('#importar').submit(function(event){
         event.preventDefault();
         importar();
@@ -287,13 +269,14 @@ function mostrarColecciones(){
             html += htmlColeccion(i);
         }
     } else {
-        html += "<p>No hay colecciones disponibles.</p>";
+        html += "<p style='text-align:center;'>No hay colecciones disponibles.</p>";
     }
     $('#collection-list').html(html);
 }
 
 function htmlColeccion(seleccionado){
     var html = new String();
+    console.log(seleccionado);
     if(typeof seleccionado !== "boolean"){
         html += '<a no="' + seleccionado + '" class="list-group-item coleccion eliminar">' 
         + '<h3 class="list-group-item-heading"><strong>'
@@ -301,7 +284,7 @@ function htmlColeccion(seleccionado){
         + '<p>Hoteles:</p>';
         var hoteles = colecciones[seleccionado].hoteles;
         if(hoteles.length > 0){
-            html += '<ol class="list-inline">';
+            html += '<ol class="list-inline lista-hoteles">';
             for(var i=0; i<hoteles.length;i++){
                 html +='<li>' + hoteles[i].basicData.title;
                 if(i<(hoteles.length-1)){
@@ -314,13 +297,37 @@ function htmlColeccion(seleccionado){
             html += "<p>No hay hoteles seleccionados.</p>";
         }
     } else {
-        html = "<p>No hay seleccionada ninguna coleccion.</p>"
+        html = "<p style='text-align:center;'>No hay seleccionada ninguna coleccion.</p>"
     }
     return html;
 }
 
+function collectionHandlers(){
+    $('.coleccion').droppable({
+            hoverClass:'border',
+            drop: handleDrop,
+        });
+    $('.coleccion').click(function(event){
+        event.preventDefault();
+        var s = event.currentTarget.attributes[0].value;
+        if(s>=0){
+            colecciones[s].sel = true;
+            for(var i=0; i<colecciones.length; i++){
+                if(i != s && colecciones[i].sel == true){
+                    colecciones[i].sel = false;
+                }
+            }
+        }
+        seleccionado = colecciones[s];
+        var html = htmlColeccion(s);
+        $('#selected').html(html);
+        $('#seleccionado').html(html);
+    });
+}
+
 //Rellena la coleccion con el hotel que se ha soltado encima de la coleccion
 function handleDrop(event, ui){
+    var existe = false;
     index = event.target.attributes[0].value;
     if(colecciones[index].hoteles.length == 0){
         var p = $('.coleccion[no="' + index + '"]>p').next();
@@ -332,7 +339,12 @@ function handleDrop(event, ui){
     }
     var num_alojamiento = ui.draggable[0].outerHTML.split(" ")[1].split("\"")[1];
     var hotel = alojamientos[num_alojamiento];
-    if(!colecciones[index].hoteles.includes(hotel)){
+    for(var i=0;i<colecciones[index].hoteles.length;i++){
+        if(colecciones[index].hoteles[i].basicData.name == hotel.basicData.name){
+            existe = true;
+        }
+    }
+    if(!existe){
         colecciones[index].hoteles.push(hotel);
         var nombre = hotel.basicData.title;
         if(colecciones[index].hoteles.length == 1){
@@ -348,8 +360,14 @@ function exportar(){
     var repositorio = $('#repo1').val();
     var nombre = $('#nombre_arch1').val();
 
-    //console.log("token: " + token + " repositorio: " + repositorio + " nombre: " + nombre);
-    //var github = new Github({token:token, auth:"oaut"});
+    var github = new GitHub({token:token, auth:"oauth"});
+    var json = colecciones;
+    var text = JSON.stringify(json);
+    var commit = "JSON exportado";
+    var rep = github.getRepo("Scarro", repositorio);
+
+    rep.writeFile("master", nombre, text, commit, function(err){});
+    $('#miModalExportar').modal('hide');
 }
 
 function importar(){
@@ -357,6 +375,16 @@ function importar(){
     var repositorio = $('#repo2').val();
     var nombre = $('#nombre_arch2').val();
 
-    //console.log("token: " + token + " repositorio: " + repositorio + " nombre: " + nombre);
-    //var github = new Github({token:token, auth:"oaut"});
+    var github = new GitHub({token:token, auth:"oauth"});
+    var rep = github.getRepo("Scarro", repositorio);
+    var url = "https://api.github.com/repos/Scarro/" + repositorio + "/contents/" + nombre;
+    $.getJSON(url).done(function(data){
+        colecciones = JSON.parse(decodeURIComponent(escape(atob(data.content))));
+        mostrarColecciones();
+        collectionHandlers();
+        $('#miModalImportar').modal('hide');
+    }).fail(function(error){
+        alert(nombre + ": " + error.statusText);
+        $('#miModalImportar').modal('hide');
+    });
 }
