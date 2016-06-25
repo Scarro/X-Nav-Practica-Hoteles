@@ -1,62 +1,102 @@
 var marcadores = [];
 var colecciones = [];
-var seleccionado = false;
 var map;
-var zoom;
-var tab;
 var col_tab = false;
+var tab = 1;
+var zoom;
+var seleccionado;
 
 $(document).ready(function(){
     initMap();
     $('#get').click(function(event){
         event.preventDefault();
-        $('#get').html('').hide();
         dameAlojamientos();
     });
-
+    mostrarColecciones();
     $('#form-coleccion').submit(function(event){
         event.preventDefault();
         insertar_coleccion($('#nueva_coleccion').val());
-        mostrar_colecciones();
+        mostrarColecciones();
         $('.coleccion').droppable({
             hoverClass:'border',
-            over: function(event, ui){
-                console.log("over me");
-            },
             drop: handleDrop,
         });
         $('.coleccion').click(function(event){
             event.preventDefault();
             var s = event.currentTarget.attributes[0].value;
-            if(s== true) {
-                for(var i = 0; i<colecciones.length; i++){
-                    if(colecciones[i].sel == true){
+            if(s>=0){
+                colecciones[s].sel = true;
+                for(var i=0; i<colecciones.length; i++){
+                    if(i != s && colecciones[i].sel == true){
                         colecciones[i].sel = false;
                     }
                 }
             }
-            colecciones[s].sel = true;
-            seleccionado = true;
-            var html = mostrarSeleccionado(s);
+            seleccionado = colecciones[s];
+            var html = htmlColeccion(s);
             $('#selected').html(html);
+            $('#seleccionado').html(html);
         });
+    });
+
+    $('#importar').submit(function(event){
+        event.preventDefault();
+        importar();
+    });
+    $('#exportar').submit(function(event){
+        event.preventDefault();
+        exportar();
     });
 });
 
+
+//Inicializa el mapa
 var initMap = function(){
     $("#map").fadeIn(800);
     map = L.map('map').setView([40.4175, -3.708], 11);
-    L.tileLayer('https://api.tiles.mapbox.com/v4/scarro.ppial27m/{z}/{x}/{y}.png?access_token=pk.eyJ1Ijoic2NhcnJvIiwiYSI6ImNpbmhtdWdnaTAwMmd2ZGx5eHhsaWs5YzEifQ.FONk5Fvpiz12ehN8ByO2GA', {
+    L.tileLayer('https://api.tiles.mapbox.com/v4/scarro.0fp5pccj/{z}/{x}/{y}.png?access_token=pk.eyJ1Ijoic2NhcnJvIiwiYSI6ImNpbmhtdWdnaTAwMmd2ZGx5eHhsaWs5YzEifQ.FONk5Fvpiz12ehN8ByO2GA', {
         attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
         maxZoom: 18
     }).addTo(map);
-    L.easyButton('fa-map', 
-              function (){
-                borrarTodosMarcadores();
-              },
-             'Limpiar el mapa'
-            ).addTo(map);
+    L.easyButton('fa-map', function (){
+            borrarTodosMarcadores();
+        },
+        'Limpiar el mapa'
+    ).addTo(map);
 };
+
+function tabsHandler(){
+    $('#myNavbar > ul').fadeIn(500);
+    $('#refresh').fadeIn(500);
+    $('#colecciones-nav').click(function(){
+        col_tab = true;
+        $('#get').hide();
+        if(tab==3){
+            $('#lista-alojamientos').fadeIn(500);
+        }
+        $('.alojamientos').hide();
+        $('.colecciones').fadeIn(500);
+        $('.alojamiento').draggable('enable');
+        tab = 2;
+    });
+    $('#gestion-nav').click(function(){
+        $('#lista-alojamientos').hide();
+        $('.alojamientos').hide();
+        $('.colecciones').hide();
+        tab = 3;
+    });
+    $('#main-nav').click(function(){
+        col_tab = false;
+        $('#get').show();
+        if(tab==3){
+            $('#lista-alojamientos').fadeIn(500);
+        }
+        $('.alojamientos').fadeIn(500);
+        $('.colecciones').hide();
+        $('.alojamiento').draggable('disable');
+        tab = 1;
+    });
+}
 
 function dameAlojamientos(){
     $('#lista').empty();
@@ -85,41 +125,6 @@ function dameAlojamientos(){
                 dameAlojamiento($(this).attr('no'), 15);
             }
         });
-
-    });
-}
-
-function tabsHandler(){
-    $('#colecciones-nav').fadeIn(800);
-    $('#gestion-nav').fadeIn(800);
-    $('#lista-alojamientos').fadeIn(500);
-    tab = 1;
-    $('#colecciones-nav').click(function(){
-        col_tab = true;
-        $('.alojamientos').hide();
-        if(tab == 3){
-            $('#lista-alojamientos').fadeIn(500);
-        }
-        //Aqui he de poner que se vea la lista seleccionada???
-        $('.colecciones').fadeIn(500);
-        $('.alojamiento').draggable('enable');
-        tab = 2;
-    });
-    $('#gestion-nav').click(function(){
-        $('#lista-alojamientos').fadeOut(500);
-        $('.alojamientos').fadeOut(500);
-        $('.colecciones').fadeOut(500);
-        tab = 3;
-    })
-    $('#main-nav').click(function(){
-        col_tab = false;
-        if(tab == 3){
-            $('#lista-alojamientos').fadeIn(500);
-        }
-        $('.colecciones').hide();
-        $('.alojamientos').fadeIn(500);
-        $('.alojamiento').draggable('disable');
-        tab = 1;
     });
 }
 
@@ -129,6 +134,7 @@ function dameAlojamiento(number,zoom){
     var name = alojamiento.basicData.name;
     var lat = alojamiento.geoData.latitude;
     var lon = alojamiento.geoData.longitude;
+    var dir = alojamiento.geoData.address;
     var url = alojamiento.basicData.web;
     var desc = alojamiento.basicData.body;
     var cat = alojamiento.extradata.categorias.categoria.item[1]['#text'];
@@ -146,14 +152,20 @@ function dameAlojamiento(number,zoom){
         }
     });
     if(!existe){
+        console.log("Creo marcador");
         crearMarcador(number, name, url, lat, lon);
     } else {
+        console.log(zoom);
         map.setView([lat,lon], zoom);
     }
-    var descripcion = "<p><h1>" + name + "</h1>"
-        + '<p>Tipo: ' + cat;
+    var descripcion = "<p><h1 class='titulo detalle'>" + name + "</h1>"
+        + '<p>Tipo: <span class="tipo">' + cat + "</span>";
     if(subcat)
-        descripcion += ', categoría: ' + subcat + '</p>';
+        descripcion += ', categoría: <span class="categoria">' + subcat + "</span>";
+    if(dir){
+        descripcion += '<br/>Direccion: ' + dir + '</p>'
+    }
+    descripcion += "</p>"
     if(desc){
         descripcion += "<h4>" + desc + "</h4></p>";
     }
@@ -213,13 +225,13 @@ function crearCarousel(selector,images){
     carousel +="<li data-target='#carousel1' data-slide-to=" + i + "></li>";
   }
   carousel += "</ol>";
-  carousel += "<div class='carousel-inner' role='listbox'>";
+  carousel += "<div class='carousel-inner'>";
   carousel += "<div class='item active'>";
-  carousel += "<img src='" + images[0].url + "' alt='imagen' class='img-responsive'>";
+  carousel += "<img src='" + images[0].url + "' alt='imagen' style='width:100%;'>";
   carousel += "</div>";
   for(i=1;i<images.length;i++){
     carousel += "<div class='item'>";
-    carousel += "<img src='" + images[i].url + "' alt='imagen' class='img-responsive'>";
+    carousel += "<img src='" + images[i].url + "' alt='imagen' style='width:100%;'>";
     if(images[i].description != null){
       carousel += "<div class='carousel-caption'>";
       carousel += "<h3>" + images[i].description + "</h3>";
@@ -249,18 +261,30 @@ function borrarTodosMarcadores(){
 
 //Inserta una nueva coleccion al array de objetos colecciones
 function insertar_coleccion(coleccion){
-    var c = {nombre: coleccion, hoteles: new Array(), sel:false};
-    colecciones.push(c);
+    var existe = false;
+    for(var i=0; i<colecciones.length; i++){
+        if(colecciones[i].nombre == coleccion){
+            existe = true;
+        }
+    }
+    if(!existe){
+        $('#error').html('');
+        var c = {nombre: coleccion, hoteles: new Array(), sel:false};
+        colecciones.push(c);
+    } else {
+        mensaje = "Ya existe una colección con ese nombre."
+        $('#error').html(mensaje);
+    }
     $('#nueva_coleccion').val('');
 }
 
 //Muestra en el html las colecciones disponibles
-function mostrar_colecciones(){
+function mostrarColecciones(){
     var html = new String();
     var hoteles = [];
     if(colecciones.length > 0){
         for(var i = 0; i<colecciones.length; i++){
-            html += mostrarSeleccionado(i);
+            html += htmlColeccion(i);
         }
     } else {
         html += "<p>No hay colecciones disponibles.</p>";
@@ -268,42 +292,71 @@ function mostrar_colecciones(){
     $('#collection-list').html(html);
 }
 
-function mostrarSeleccionado(seleccionado){
+function htmlColeccion(seleccionado){
     var html = new String();
-    html += '<a no="' + seleccionado + '" class="list-group-item coleccion">' 
-        + '<h4 class="list-group-item-heading">'
-        + colecciones[seleccionado].nombre + '</h4>'
+    if(typeof seleccionado !== "boolean"){
+        html += '<a no="' + seleccionado + '" class="list-group-item coleccion eliminar">' 
+        + '<h3 class="list-group-item-heading"><strong>'
+        + colecciones[seleccionado].nombre + '</strong></h3>'
         + '<p>Hoteles:</p>';
-    var hoteles = colecciones[seleccionado].hoteles;
-    if(hoteles.length > 0){
-        html += '<ol class="list-inline">';
-        for(var j=0; j<hoteles.length;j++){
-            html +='<li>' + hoteles[j]
-            + '</li>'
+        var hoteles = colecciones[seleccionado].hoteles;
+        if(hoteles.length > 0){
+            html += '<ol class="list-inline">';
+            for(var i=0; i<hoteles.length;i++){
+                html +='<li>' + hoteles[i].basicData.title;
+                if(i<(hoteles.length-1)){
+                    html += '<span>, <span>';
+                }
+                html += '</li>'
+            }
+            html += '</ol></a>';
+        } else {
+            html += "<p>No hay hoteles seleccionados.</p>";
         }
-        html += '</ol>'
     } else {
-        html += "<p>No hay hoteles seleccionados.</p>";
+        html = "<p>No hay seleccionada ninguna coleccion.</p>"
     }
-    html += "</a>";
     return html;
 }
 
 //Rellena la coleccion con el hotel que se ha soltado encima de la coleccion
 function handleDrop(event, ui){
     index = event.target.attributes[0].value;
-    hotel = ui.draggable[0].innerText;
-    colecciones[index].hoteles.push(hotel);
-    var p = $('.coleccion[no="' + index + '"]>p').next();
-    if(p[0].innerText == "No hay hoteles seleccionados."){
-        p[0].innerHTML = '';
-        if(p.length == 2){
-            p[1].innerText = '';
+    if(colecciones[index].hoteles.length == 0){
+        var p = $('.coleccion[no="' + index + '"]>p').next();
+        if(p[0].innerText == "No hay hoteles seleccionados."){
+            for(var i=0; i<p.length; i++){
+                p[i].innerText = '';
+            }
         }
     }
-    if(colecciones[index].hoteles.length == 1){
-        $('.coleccion[no="' + index + '"]>p').next().append(hotel);
-    } else if (colecciones[index].hoteles.length > 1){
-        $('.coleccion[no="' + index + '"]>p').next().append(', ' + hotel);
+    var num_alojamiento = ui.draggable[0].outerHTML.split(" ")[1].split("\"")[1];
+    var hotel = alojamientos[num_alojamiento];
+    if(!colecciones[index].hoteles.includes(hotel)){
+        colecciones[index].hoteles.push(hotel);
+        var nombre = hotel.basicData.title;
+        if(colecciones[index].hoteles.length == 1){
+            $('.coleccion[no="' + index + '"]>p').next().append(nombre);
+        } else if (colecciones[index].hoteles.length > 1){
+            $('.coleccion[no="' + index + '"]>p').next().append(', ' + nombre);
+        }
     }
+}
+
+function exportar(){
+    var token = $('#token1').val();
+    var repositorio = $('#repo1').val();
+    var nombre = $('#nombre_arch1').val();
+
+    //console.log("token: " + token + " repositorio: " + repositorio + " nombre: " + nombre);
+    var github = new Github({token:token, auth:"oaut"});
+}
+
+function importar(){
+    var token = $('#token2').val();
+    var repositorio = $('#repo2').val();
+    var nombre = $('#nombre_arch2').val();
+
+    //console.log("token: " + token + " repositorio: " + repositorio + " nombre: " + nombre);
+    var github = new Github({token:token, auth:"oaut"});
 }

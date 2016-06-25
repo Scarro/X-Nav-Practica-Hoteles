@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="external/leaflet/font-awesome-4.6.3/css/font-awesome.css">
     <link rel="stylesheet" href="css/style.css">
 </head>
-<body>
+<body class="fuente">
     <div class="container-fluid">
         <div class="navbar navbar-inverse">
             <div class="navbar-header">
@@ -19,60 +19,136 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                <a id="main-nav" class="navbar-brand">Alojamientos</a>
+                <a id="main-nav" class="navbar-brand titulo navegador">Alojamientos en Madrid</a>
             </div>
-            <div class="collapse navbar-collapse" id="myNavbar">
+            <div id="myNavbar" class="collapse navbar-collapse">
                 <ul class="nav navbar-nav">
-                    <li id="colecciones-nav" style="display:none;"><a>Colecciones</a></li>
-                    <li id="gestion-nav" style="display:none;"><a>Gestión de alojamientos</a></li>
+                    <li id="colecciones-nav"><a>Colecciones</a></li>
+                    <li id="gestion-nav"><a>Gestión de alojamientos</a></li>
+                </ul>
+                <ul class="nav navbar-nav navbar-right">
+                    <li data-toggle="modal" data-target="#miModalImportar"><a><span class="fa fa-github fa-1x"></span> Importar</a></li>
+                    <li data-toggle="modal" data-target="#miModalExportar"><a><span class="fa fa-github fa-1x"></span> Exportar</a></li>
                 </ul>
             </div>
         </div>
     </div>
+    <!--Pagina Principal -->
     <div id="main" class="container-fluid">
-        <div class="col-sm-3">
-            <button id="get" type="button" class="btn btn-default">
-                <span class="glyphicon glyphicon-collapse-down"></span>
-                <span>Alojamientos</span>
-            </button>
-            <div id="lista-alojamientos" style="display:none;">
-                <input type="search" class="form-control" id="searchinput" placeholder="Buscar...">
+        <!--Columna de alojamientos -->
+        <div id="lista-alojamientos" class="col-sm-3">
+            <div class="titulo" style="text-decoration: none;">
+                <h1><span style="text-decoration:underline">Alojamientos</span>
+                    <button id="get" type="button" class="btn btn-info"><span class="glyphicon glyphicon-refresh"><span></button>
+                </h1>
+            </div>
+            <div id="refresh" style="display:none;">
                 <ul id="lista" class="nav nav-pills nav-stacked"></ul>
                 <h4 id="num_hoteles"></h4>
             </div>
         </div>
+        <!-- Contenido -->
         <div class="col-sm-9">
-            <div class="row alojamientos">
-                <div id="map"></div>
+            <div class="alojamientos">
+                <div class="row">
+                    <div id="map" class="col-sm-8"></div>
+                    <div class="col-sm-3">
+                        <h3 class="titulo">Coleccion seleccionada:</h3>
+                        <div id="seleccionado"></div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div id="detalles"></div>
+                </div>
             </div>
-            <div class="row colecciones" style="display:none">
-                <div id="form-colecciones" class="col-sm-8">
-                    <form id="form-coleccion" class="col-xs-10 form-horizontal" data-toggle="validator" role="form">
+            <div class="colecciones" style="display:none">
+                <div class="row">
+                    <form id="form-coleccion" data-toggle="validator" class="form-inline" role="form">
                         <div class="form-group">
-                            <label for="collection" class="control-label">Introduce una nueva coleccion: </label>
-                            <input id="nueva_coleccion" type="text" class="form-control" id="collection" placeholder="Escriba aqui..." required>
+                            <label for="coleccion-input" class="control-label">Introduce colección: </label>
+                            <input type="text" class="form-control" id="nueva_coleccion" placeholder="Escribe aqui..." required>
                         </div>
                         <div class="form-group">
-                            <button id="btn_coleccion" type="submit" class="btn btn-primary pull-right">Entrar</button>
+                            <button id="btn_coleccion" type="submit" class="btn btn-primary">Crear</button>
+                        </div>
+                        <div id="error" style="color:red; height:10px"></div>
+                    </form>
+                </div>
+                <div class="row">
+                    <div class="col-xs-6">
+                        <h2>Colecciones: </h2>
+                        <div id="collection-list" class="list-group"></div>
+                    </div>
+                    <div class="col-xs-6">
+                        <h2>Seleccionada:</h2>
+                        <div id="selected" class="list-group"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--Modales-->
+        <div class="modal fade" id="miModalExportar" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                <form id="exportar" role="form">
+                    <div class="modal-header">
+                        <button class="close" aria-hidden="true" data-dismiss="modal">×</button>
+                        <h2 class="modal-title">Exportar a Github</h2>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label for="token">Token</label>
+                            <input id="token1" placeholder="token" class="form-control" type="text" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="repositorio">Repositorio</label>
+                            <input id="repo1" placeholder="repositorio" class="form-control" type="text" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="nombre">Nombre del repositorio</label>
+                            <input id="nombre_arch1" placeholder="nombre" class="form-control" type="text" required>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-primary">Aceptar</button>
+                        <button class="btn btn-default" data-dismiss="modal">Cancelar</button>
+                    </div>
+                </form>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="miModalImportar">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <form id="importar" role="form">
+                        <div class="modal-header">
+                            <button class="close" aria-hidden="true" data-dismiss="modal">×</button>
+                            <h2 class="modal-title">Importar a Github</h2>
+                        </div>
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <label for="token">Token</label>
+                                <input id="token2" placeholder="token" class="form-control" type="text">
+                            </div>
+                            <div class="form-group">
+                                <label for="repositorio">Repositorio</label>
+                                <input id="repo2" placeholder="repositorio" class="form-control" type="text">
+                            </div>
+                            <div class="form-group">
+                                <label for="nombre">Nombre del repositorio</label>
+                                <input id="nombre_arch2" placeholder="nombre" class="form-control" type="text">
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button class="btn btn-primary">Aceptar</button>
+                            <button class="btn btn-default" data-dismiss="modal">Cancelar</button>
                         </div>
                     </form>
                 </div>
             </div>
-            <div class="row colecciones" style="display:none">
-                <div class="col-xs-6">
-                    <h2>Colecciones: </h2>
-                    <div id="collection-list" class="list-group"></div>
-                </div>
-                <div class="col-xs-6">
-                    <h2>Seleccionada:</h2>
-                    <div id="selected" class="list-group"></div>
-                </div>
-            </div>
-            <div class="row alojamientos">
-                <div id="detalles"></div>
-            </div>
         </div>
     </div>
+    
     <script type="text/javascript" src="external/jquery/jquery.js"></script>
     <script type="text/javascript" src="external/jquery/jquery-ui.js"></script>
     <script type="text/javascript" src="external/bootstrap/js/bootstrap.js"></script>
@@ -80,6 +156,9 @@
     <script src="https://cdn.rawgit.com/CliffCloud/Leaflet.EasyButton/master/src/easy-button.js"></script>
     <script type="text/javascript" src="js/functions.js"></script>
     <script type="text/javascript" src="external/bootstrap/js/bootstrap-list-filter.src.js"></script>
-
+    <!-- just github-api source (5.3kb) -->
+    <script src="//npmcdn.com/github-api/dist/GitHub.min.js"></script>
+    <!-- standalone (20.3kb) -->
+    <script src="//npmcdn.com/github-api/dist/GitHub.bundle.min.js"></script>
 </body>
 </html>
