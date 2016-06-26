@@ -27,9 +27,6 @@ var seleccionado;
 
 $(document).ready(function(){
     initMap();
-    console.log(hay_local);
-    console.log(colecciones);
-    console.log(hotelusers);
     $('#get').click(function(event){
         event.preventDefault();
         dameAlojamientos();
@@ -120,9 +117,6 @@ function tabsHandler(){
 function dameAlojamientos(){
     $('#lista').empty();
     tabsHandler();
-    if(hay_local){
-        console.log("hay marcadores");
-    }
     $.getJSON('data/alojamientos.json', function(data){
         alojamientos = data.serviceList.service;
         var lista = new String();
