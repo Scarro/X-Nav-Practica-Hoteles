@@ -1,7 +1,23 @@
 var apiKey = 'AIzaSyCrYFTdRQ2RlvWuIeNxZxC6NFplpamMLLk';
+var hay_local = JSON.parse(localStorage.getItem('hay_local'));
+if(hay_local == null){
+    hay_local = false;
+}
 var marcadores = [];
 var colecciones = [];
 var hotelusers = [];
+
+if(hay_local){
+    col = JSON.parse(localStorage.getItem('colecciones'));
+    if(col != null){
+        colecciones = col;
+    }
+    hu = JSON.parse(localStorage.getItem('hotelusers'));
+    if(hu != null){
+        hotelusers = hu;
+    }
+}
+
 var detalles = false;
 var map;
 var col_tab = false;
@@ -11,9 +27,15 @@ var seleccionado;
 
 $(document).ready(function(){
     initMap();
+    console.log(hay_local);
+    console.log(colecciones);
+    console.log(hotelusers);
     $('#get').click(function(event){
         event.preventDefault();
         dameAlojamientos();
+        if(hay_local){
+            eventosCache();
+        }
     });
     mostrarColecciones();
     $('#seleccionado').html(htmlColeccion(false));
@@ -98,6 +120,9 @@ function tabsHandler(){
 function dameAlojamientos(){
     $('#lista').empty();
     tabsHandler();
+    if(hay_local){
+        console.log("hay marcadores");
+    }
     $.getJSON('data/alojamientos.json', function(data){
         alojamientos = data.serviceList.service;
         var lista = new String();
@@ -273,6 +298,8 @@ function insertar_coleccion(coleccion){
         $('#error').html('');
         var c = {nombre: coleccion, hoteles: new Array(), sel:false};
         colecciones.push(c);
+        localStorage.setItem('colecciones', JSON.stringify(colecciones));
+        localStorage.setItem('hay_local', JSON.stringify(true));
     } else {
         mensaje = "Ya existe una colección con ese nombre."
         $('#error').html(mensaje);
@@ -401,12 +428,18 @@ function importar(){
         var datos = JSON.parse(decodeURIComponent(escape(atob(data.content))));
         colecciones = datos[0];
         hotelusers = datos[1];
+        localStorage.setItem('colecciones', JSON.stringify(colecciones));
+        localStorage.setItem('hotelusers', JSON.stringify(hotelusers));
+        localStorage.setItem('hay_local', JSON.stringify(true));
         mostrarColecciones();
         collectionHandlers();
         html = htmlColeccion(false);
         $('#selected').html(html);
         $('#seleccionado').html(html);
         $('#miModalImportar').modal('hide');
+        var hotel = $('#descr > div > h1')[0].innerText;
+        mostrarUsuarios(hotel);
+        eventosCache();
     }).fail(function(error){
         alert(nombre + ": " + error.statusText);
         $('#miModalImportar').modal('hide');
@@ -426,7 +459,7 @@ function mostrarUsuarios(hotel){
         //nunca se crea un hotel sin usuarios en hotelusers
         var html = new String();
         for(var i = 0; i<hotelusers[indice].usuarios.length; i++){
-            html += '<a class="list-group-item">';
+            html += '<a href="' + hotelusers[indice].usuarios[i].url + '" class="list-group-item">';
             html += '<img src="' + hotelusers[indice].usuarios[i].imagen + '">';
             html += '<span> ' + hotelusers[indice].usuarios[i].nombre + '</span></a>';
         }
@@ -448,7 +481,7 @@ function agregarUsuario(hotel){
         user.execute(function(resp){
             var agregado = false;
             if(resp.displayName){
-                var usuario = {nombre:resp.displayName, imagen: resp.image.url};
+                var usuario = {nombre:resp.displayName, imagen: resp.image.url, url: resp.url};
                 var encontradoUser = false;
                 var encontradoHotel = false;
                 for(var i = 0; i<hotelusers.length;i++){
@@ -471,6 +504,10 @@ function agregarUsuario(hotel){
                     agregado = true;
                 }
                 if(agregado){
+                    localStorage.setItem('hotelusers', JSON.stringify(hotelusers));
+                    localStorage.setItem('hay_local', JSON.stringify(true));
+                    $('#borrar_cache_nav').show();
+                    eventosCache();
                     mostrarUsuarios(hotel);
                 }
             } else {
@@ -478,5 +515,31 @@ function agregarUsuario(hotel){
             }
         });
     });
+}
+
+function eventosCache(){
+    $('#borrar_cache_nav').show();
+    $('#borrar_cache_nav').click(function(){
+        borrarCache();
+        $('#borrar_cache_nav').hide();
+    });
+}
+
+
+function borrarCache(){
+    localStorage.removeItem("colecciones");
+    localStorage.removeItem("hotelusers");
+    localStorage.setItem('hay_local', JSON.stringify(false));
+
+    colecciones = [];
+    hotelusers = [];
+
+    $('#seleccionado').html(htmlColeccion(false));
+    $('#selected').html(htmlColeccion(false));
+    if(tab == 3){
+        var hotel = $('#descr > div > h1')[0].innerText;
+        mostrarUsuarios(hotel);
+    }
+    mostrarColecciones();
 }
 

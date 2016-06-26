@@ -25,6 +25,7 @@
                 <ul class="nav navbar-nav">
                     <li id="colecciones-nav"><a>Colecciones</a></li>
                     <li id="gestion-nav"><a>Gestión de alojamientos</a></li>
+                    <li id="borrar_cache_nav" style="display:none;"><a>Borrar Datos</a></li>
                 </ul>
                 <ul class="nav navbar-nav navbar-right">
                     <li data-toggle="modal" data-target="#miModalImportar"><a><span class="fa fa-github fa-1x"></span> Importar</a></li>
@@ -39,7 +40,7 @@
         <div id="lista-alojamientos" class="col-sm-3">
             <div class="titulo" style="text-decoration: none;">
                 <h1><span style="text-decoration:underline">Alojamientos</span>
-                    <button id="get" type="button" class="btn btn-info"><span class="glyphicon glyphicon-refresh"><span></button>
+                    <button id="get" type="button" class="btn btn-primary">Refresh</button>
                 </h1>
             </div>
             <div id="refresh" style="display:none;">

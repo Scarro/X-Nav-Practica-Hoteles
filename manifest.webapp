@@ -1,0 +1,12 @@
+{
+  "name": "Alojamientos",
+  "description": "Alojamientos en Madrid",
+  "launch_path": "/index.html",
+  "icons": {
+    "128": "/images/icon-128.png"
+  },
+  "developer": {
+    "name": "Sergio",
+    "url": "https://plus.google.com/u/0/111356274235181573147/posts"
+  }
+}
