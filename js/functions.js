@@ -1,5 +1,8 @@
+var apiKey = 'AIzaSyCrYFTdRQ2RlvWuIeNxZxC6NFplpamMLLk';
 var marcadores = [];
 var colecciones = [];
+var hotelusers = [];
+var detalles = false;
 var map;
 var col_tab = false;
 var tab = 1;
@@ -20,6 +23,12 @@ $(document).ready(function(){
         insertar_coleccion($('#nueva_coleccion').val());
         mostrarColecciones();
         collectionHandlers();
+    });
+    $('#form-usuario').submit(function(event){
+        event.preventDefault();
+        var hotel = $('#descr')[0].innerText.split("\n")[1];
+        agregarUsuario(hotel);
+        $('#nuevo_usuario').val('');
     });
     $('#importar').submit(function(event){
         event.preventDefault();
@@ -65,16 +74,22 @@ function tabsHandler(){
         $('#lista-alojamientos').hide();
         $('.alojamientos').hide();
         $('.colecciones').hide();
+        if(detalles){
+            var hotel = $('#descr > div > h1')[0].innerText;
+            mostrarUsuarios(hotel);
+            $('.gestion').fadeIn(500);
+        }
         tab = 3;
     });
     $('#main-nav').click(function(){
         col_tab = false;
         $('#get').show();
+        $('.colecciones').hide();
+        $('.gestion').hide();
         if(tab==3){
             $('#lista-alojamientos').fadeIn(500);
         }
         $('.alojamientos').fadeIn(500);
-        $('.colecciones').hide();
         $('.alojamiento').draggable('disable');
         tab = 1;
     });
@@ -134,34 +149,38 @@ function dameAlojamiento(number,zoom){
         }
     });
     if(!existe){
-        console.log("Creo marcador");
         crearMarcador(number, name, url, lat, lon);
     } else {
-        console.log(zoom);
         map.setView([lat,lon], zoom);
     }
-    var descripcion = "<p><h1 class='titulo detalle'>" + name + "</h1>"
+    var descripcion = "<div><h1 no='" + number + "' class='titulo detalle'>" + name + "</h1>"
         + '<p>Tipo: <span class="tipo">' + cat + "</span>";
     if(subcat)
         descripcion += ', categoría: <span class="categoria">' + subcat + "</span>";
     if(dir){
         descripcion += '<br/>Direccion: ' + dir + '</p>'
     }
-    descripcion += "</p>"
     if(desc){
-        descripcion += "<h4>" + desc + "</h4></p>";
+        descripcion += "<h4>" + desc + "</h4></div>";
     }
     if(images){
         if(images.length > 1){
             selector = $('#detalles');
-            crearCarousel(selector,images);
+            selector2 = $('#descr');
+            crearCarousel(selector,images,1);
+            crearCarousel(selector2, images,2);
         } else if(!images.length){
-            $('#detalles').html('<img src="' + images.url + '" class="imagen col-sm-6 img-responsive" alt="imagen">');
+            var html = '<img src="' + images.url + '" class="imagen col-sm-6 img-responsive" alt="imagen">';
+            $('#detalles').html(html);
+            $('#descr').html(html);
         }
         $('#detalles').append(descripcion);
+        $('#descr').append(descripcion);
     } else {
         $('#detalles').html(descripcion);
+        $('#descr').html(descripcion);
     }
+    detalles = true;
 }
 
 //Crea El localizador en el mapa del Alojamiento
@@ -199,12 +218,13 @@ function onPopupOpen(){
 }
 
 //Crea el carousel en el selector indicado con las imagenes entregadas
-function crearCarousel(selector,images){
-  var carousel = "<div id='carousel1' class='imagen col-sm-6 carousel slide show' data-ride='carousel'>";
+//num == num de carousel
+function crearCarousel(selector,images,num){
+  var carousel = "<div id='carousel" + num + "' class='imagen col-sm-6 carousel slide show' data-ride='carousel'>";
   carousel += "<ol class='carousel-indicators'>";
-  carousel += "<li data-target='#carousel1' data-slide-to='0' class='active'></li>";
+  carousel += "<li data-target='#carousel" + num + "' data-slide-to='0' class='active'></li>";
   for(i=1; i<images.length; i++){
-    carousel +="<li data-target='#carousel1' data-slide-to=" + i + "></li>";
+    carousel +="<li data-target='#carousel" + num + "' data-slide-to=" + i + "></li>";
   }
   carousel += "</ol>";
   carousel += "<div class='carousel-inner'>";
@@ -222,10 +242,10 @@ function crearCarousel(selector,images){
     carousel += "</div>" ;
   }
   // Controles
-  carousel += "<a class='left carousel-control' href='#carousel1' role='button' data-slide='prev'>";
+  carousel += "<a class='left carousel-control' href='#carousel" + num + "' role='button' data-slide='prev'>";
   carousel += "<span class='glyphicon glyphicon-chevron-left' aria-hidden='true'></span>";
   carousel += "<span class='sr-only'>Previous</span></a>";
-  carousel += "<a class='right carousel-control controles' href='#carousel1' role='button' data-slide='next'>";
+  carousel += "<a class='right carousel-control controles' href='#carousel" + num + "'role='button' data-slide='next'>";
   carousel += "<span class='glyphicon glyphicon-chevron-right' aria-hidden='true'></span>";
   carousel += "<span class='sr-only'>Next</span></a>";
   carousel += "</div>";
@@ -276,7 +296,6 @@ function mostrarColecciones(){
 
 function htmlColeccion(seleccionado){
     var html = new String();
-    console.log(seleccionado);
     if(typeof seleccionado !== "boolean"){
         html += '<a no="' + seleccionado + '" class="list-group-item coleccion eliminar">' 
         + '<h3 class="list-group-item-heading"><strong>'
@@ -294,7 +313,7 @@ function htmlColeccion(seleccionado){
             }
             html += '</ol></a>';
         } else {
-            html += "<p>No hay hoteles seleccionados.</p>";
+            html += "<p class='lista-hoteles'>No hay hoteles seleccionados.</p>";
         }
     } else {
         html = "<p style='text-align:center;'>No hay seleccionada ninguna coleccion.</p>"
@@ -361,7 +380,7 @@ function exportar(){
     var nombre = $('#nombre_arch1').val();
 
     var github = new GitHub({token:token, auth:"oauth"});
-    var json = colecciones;
+    var json = [colecciones, hotelusers];
     var text = JSON.stringify(json);
     var commit = "JSON exportado";
     var rep = github.getRepo("Scarro", repositorio);
@@ -379,12 +398,85 @@ function importar(){
     var rep = github.getRepo("Scarro", repositorio);
     var url = "https://api.github.com/repos/Scarro/" + repositorio + "/contents/" + nombre;
     $.getJSON(url).done(function(data){
-        colecciones = JSON.parse(decodeURIComponent(escape(atob(data.content))));
+        var datos = JSON.parse(decodeURIComponent(escape(atob(data.content))));
+        colecciones = datos[0];
+        hotelusers = datos[1];
         mostrarColecciones();
         collectionHandlers();
+        html = htmlColeccion(false);
+        $('#selected').html(html);
+        $('#seleccionado').html(html);
         $('#miModalImportar').modal('hide');
     }).fail(function(error){
         alert(nombre + ": " + error.statusText);
         $('#miModalImportar').modal('hide');
     });
 }
+
+function mostrarUsuarios(hotel){
+    var indice = 0;
+    var encontrado = false;
+    for(var i = 0; i<hotelusers.length; i++){
+        if(hotelusers[i].hotel == hotel){
+            encontrado = true;
+            indice = i;
+        }
+    }
+    if(encontrado){
+        //nunca se crea un hotel sin usuarios en hotelusers
+        var html = new String();
+        for(var i = 0; i<hotelusers[indice].usuarios.length; i++){
+            html += '<a class="list-group-item">';
+            html += '<img src="' + hotelusers[indice].usuarios[i].imagen + '">';
+            html += '<span> ' + hotelusers[indice].usuarios[i].nombre + '</span></a>';
+        }
+        $('#usuarios').html(html);
+    } else {
+        $('#usuarios').html("<p>No hay usuarios asignados.<p>");
+    }
+}
+
+function agregarUsuario(hotel){
+    var username = $('#nuevo_usuario').val();
+
+    gapi.client.setApiKey(apiKey);
+    gapi.client.load('plus', 'v1', function(){
+        var user = gapi.client.plus.people.get({
+            'userId':username,
+        });
+        
+        user.execute(function(resp){
+            var agregado = false;
+            if(resp.displayName){
+                var usuario = {nombre:resp.displayName, imagen: resp.image.url};
+                var encontradoUser = false;
+                var encontradoHotel = false;
+                for(var i = 0; i<hotelusers.length;i++){
+                    if(hotelusers[i].hotel == hotel){
+                        encontradoHotel = true;
+                        for(var j = 0; j<hotelusers[i].usuarios.length;j++){
+                            if(hotelusers[i].usuarios[j].nombre == usuario.nombre){
+                                encontradoUser = true;
+                            }
+                        }
+                        if(!encontradoUser){
+                            hotelusers[i].usuarios.push(usuario);
+                            agregado=true;
+                        }
+                    }
+                }
+                if(!encontradoHotel){
+                    var nuevo = {hotel:hotel, usuarios:[usuario]};
+                    hotelusers.push(nuevo);
+                    agregado = true;
+                }
+                if(agregado){
+                    mostrarUsuarios(hotel);
+                }
+            } else {
+                alert('usuario no encontrado');
+            }
+        });
+    });
+}
+

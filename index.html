@@ -62,7 +62,7 @@
                 </div>
             </div>
             <div class="colecciones" style="display:none">
-                <div class="row">
+                <div class="row primera">
                     <div class="col-sm-offset-3">
                         <form id="form-coleccion" data-toggle="validator" class="form-inline" role="form">
                             <div class="form-group">
@@ -72,7 +72,7 @@
                             <div class="form-group">
                                 <button id="btn_coleccion" type="submit" class="btn btn-primary">Crear</button>
                             </div>
-                            <div id="error" style="color:red; height:10px"></div>
+                            <div id="error"class="error"></div>
                         </form>
                     </div>
                 </div>
@@ -85,6 +85,29 @@
                         <h2 class="titulo">Seleccionada:</h2>
                         <div id="selected" class="list-group"></div>
                     </div>
+                </div>
+            </div>
+        </div>
+        <div class="gestion" style="display:none">
+            <div class="row primera">
+                <div class="col-sm-9">
+                    <form id="form-usuario" data-toggle="validator" class="form-inline" role="form">
+                        <div class="form-group">
+                            <label for="usuario-input" class="control-label">Introduce usuario: </label>
+                            <input type="text" class="form-control" id="nuevo_usuario" placeholder="Escribe aqui..." required>
+                        </div>
+                        <div class="form-group">
+                            <button id="btn_coleccion" type="submit" class="btn btn-primary">Añadir</button>
+                        </div>
+                        <div id="error2" class="error"></div>
+                    </form>
+                </div>
+            </div>
+            <div class="row">
+                <div id="descr" class="col-sm-9"></div>
+                <div class="col-sm-2">
+                    <h2 class="titulo">Usuarios:</h2>
+                    <div id="usuarios" class="list-group"></div>
                 </div>
             </div>
         </div>
@@ -158,6 +181,7 @@
     <script type="text/javascript" src="external/leaflet/leaflet.js"></script>
     <script src="https://cdn.rawgit.com/CliffCloud/Leaflet.EasyButton/master/src/easy-button.js"></script>
     <script type="text/javascript" src="external/bootstrap/js/bootstrap-list-filter.src.js"></script>
+    <script src="https://apis.google.com/js/client.js"></script>
     <!-- just github-api source (5.3kb) -->
     <script src="//npmcdn.com/github-api/dist/GitHub.min.js"></script>
     <!-- standalone (20.3kb) -->
