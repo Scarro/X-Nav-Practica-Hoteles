@@ -47,6 +47,7 @@ Grado Tecnologías de la Telecomunicación
 
 Vídeo funcionalidad básica:
 
+https://www.youtube.com/watch?v=cCrNydidcM0
 
 
 Vídeo funcionalidad optativa:

@@ -294,6 +294,7 @@ function insertar_coleccion(coleccion){
         colecciones.push(c);
         localStorage.setItem('colecciones', JSON.stringify(colecciones));
         localStorage.setItem('hay_local', JSON.stringify(true));
+        eventosCache();
     } else {
         mensaje = "Ya existe una colección con ese nombre."
         $('#error').html(mensaje);
