@@ -3,7 +3,7 @@
   "description": "Alojamientos en Madrid",
   "launch_path": "/index.html",
   "icons": {
-    "128": "/images/icon-128.png"
+    "128": "/img/icons/icon60x60.png"
   },
   "developer": {
     "name": "Sergio",

@@ -41,7 +41,7 @@ Grado Tecnologías de la Telecomunicación
 
 +Optimizada la carga de la página situando la carga de todos los scripts al final del body de la aplicación.
 
-+Agregado el manifest y probada como aplicación de FirefoxOS (aunque existen problemas para reconocer draggable y droppable).
++Agregado el manifest y probada como aplicación de FirefoxOS (aunque existen problemas para reconocer draggable y droppable). ME ES IMPOSIBLE GRABAR CON WEBIDE, SE ME CIERRA CONSTANTEMENTE
 
 
 
@@ -51,6 +51,8 @@ https://www.youtube.com/watch?v=cCrNydidcM0
 
 
 Vídeo funcionalidad optativa:
+
+https://www.youtube.com/watch?v=YucDD99REeY
 
 
 
