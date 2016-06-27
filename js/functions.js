@@ -31,6 +31,7 @@ $(document).ready(function(){
         event.preventDefault();
         dameAlojamientos();
         if(hay_local){
+            collectionHandlers();
             eventosCache();
         }
     });
