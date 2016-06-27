@@ -387,12 +387,15 @@ function handleDrop(event, ui){
     }
     if(!existe){
         colecciones[index].hoteles.push(hotel);
+        localStorage.setItem('colecciones', JSON.stringify(colecciones));
+        localStorage.setItem('hay_local', JSON.stringify(true));
         var nombre = hotel.basicData.title;
         if(colecciones[index].hoteles.length == 1){
             $('.coleccion[no="' + index + '"]>p').next().append(nombre);
         } else if (colecciones[index].hoteles.length > 1){
             $('.coleccion[no="' + index + '"]>p').next().append(', ' + nombre);
         }
+        eventosCache();
     }
 }
 
